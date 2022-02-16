@@ -14,7 +14,7 @@ import (
 	// "time"
 )
 
-// usage: 	goduino mine [optional: -workers=how_many_devices] [optional: -rig_name=rig_name] [optional: -software_name=software_name] [optional: -debug true] -name=username -diff=difficulty (LOW (for web miners and low-spec devices), MEDIUM (pc), NET (network diff - pc), EXTREME (officially not used anywhere, but you can use it to mine or gpus - howewer this program currently don't support mining on gpus))
+// usage: 	goduino mine [optional: -workers=how_many_devices] [optional: -rig_name=rig_name] [optional: -software_name=software_name] [optional: -debug true] -name=username -diff=difficulty (AVR for ????, LOW (for web miners and low-spec devices), MEDIUM (pc), NET (network diff - pc), EXTREME (officially not used anywhere, but you can use it to mine or gpus - howewer this program currently don't support mining on gpus))
 //			or: goduino mine -config=./config.{json,yaml} # to mine with configuration file specified after --config
 
 func cleanup(){
@@ -66,7 +66,6 @@ func main(){
 	log.Println("difficulty:", difficulty)
 	log.Println("config_path:", config_path)
 	log.Println("VERSION:", VERSION)
-	log.Println("AVAILABLE_PORTS:", AVAILABLE_PORTS)
 
 	//read config
 	if(config_path != ""){
@@ -76,5 +75,5 @@ func main(){
 	// validate username
 	if(username == ""){log.Fatalln("invalid username")}
 
-	work()
+	work(username, difficulty, software_name, rig_name)
 }
