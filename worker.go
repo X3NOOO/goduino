@@ -48,7 +48,15 @@ type ServerDetails struct {
 	Success bool
 }
 
-func work(username string, difficulty string, software_name string, rig_name string){
+type Worker struct {
+	Username 		string
+	Difficulty 		string
+	Software_name 	string
+	Rig_name 		string
+}
+
+func (self Worker) Work() {
+	var username, difficulty, software_name, rig_name string = self.Username, self.Difficulty, self.Software_name, self.Rig_name
 	// Get server details from GETPOOL_ADDR
 	log.Println("getting fastest server")
 	pool_address, err := getFastestServer()

@@ -75,5 +75,14 @@ func main(){
 	// validate username
 	if(username == ""){log.Fatalln("invalid username")}
 
-	work(username, difficulty, software_name, rig_name)
+	// work(username, difficulty, software_name, rig_name)
+
+	m := Worker{
+		Username 		: username,
+		Difficulty 		: difficulty,
+		Software_name 	: software_name,
+		Rig_name 		: rig_name,
+	}
+
+	m.Work()
 }
