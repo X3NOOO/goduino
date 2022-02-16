@@ -20,30 +20,32 @@ import (
 )
 
 func getFastestServer() (string, error){
-rawresp, err := http.Get(GETPOOL_ADDR)
-if(err != nil){
-return "", err
-}
-defer rawresp.Body.Close()
-// resp, err := net.Dial("tcp", GETPOOL_ADDR)
-log.Println("raw response:", rawresp.Body)
+	// download data from server in GETPOOL_ADDR
+	rawresp, err := http.Get(GETPOOL_ADDR)
+	if(err != nil){
+	return "", err
+	}
+	defer rawresp.Body.Close()
+	// resp, err := net.Dial("tcp", GETPOOL_ADDR)
+	log.Println("raw response:", rawresp.Body)
 
-resp, err := ioutil.ReadAll(rawresp.Body)
-if(err != nil){
-return "", err
-}
-respstr := string(resp)
-log.Println("response:", respstr)
+	// parse data
+	resp, err := ioutil.ReadAll(rawresp.Body)
+	if(err != nil){
+	return "", err
+	}
+	respstr := string(resp)
+	log.Println("response:", respstr)
 
-return respstr, err
+	return respstr, err
 }
 
 type ServerDetails struct {
-Ip 		string
-Name 	string
-Port 	int
-Server 	string
-Success bool
+	Ip 		string
+	Name 	string
+	Port 	int
+	Server 	string
+	Success bool
 }
 
 func work(username string, difficulty string, software_name string, rig_name string){
@@ -112,6 +114,7 @@ func work(username string, difficulty string, software_name string, rig_name str
 		target_job := job[1]
 		diff_job, _ := strconv.Atoi(job[2])
 
+		// brute force hash
 		for i := 0; i <= diff_job*100; i++{
 			h := sha1.New()
 			h.Write([]byte(pref_job + strconv.Itoa(i)))
