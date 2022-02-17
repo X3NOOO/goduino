@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime/pprof"
+	"strconv"
 	"syscall"
 	// "time"
 )
@@ -43,17 +44,19 @@ func main(){
 	flag_name := flag.String("name", "", "your username")
 	flag_diff := flag.String("diff", "MEDIUM", "difficulty that you want to mine on")
 	flag_config := flag.String("config", "", "enter path to your configuration file")
+	flag_xxhash := flag.Bool("xxhash", false, "do you want to use xxhash instead of sha1")
 
 
 	flag.Parse()
 
-	var workers int = *flag_workers
+	var workers int = *flag_workers - 1
 	var rig_name string = *flag_rig_name
 	var software_name string = *flag_software_name
 	var debug bool = *flag_debug
 	var username string = *flag_name
 	var difficulty string = *flag_diff
 	var config_path string = *flag_config
+	var xxhash bool = *flag_xxhash
 	
 	// Set up logging
 	if(!debug){log.SetOutput(ioutil.Discard)}
@@ -64,7 +67,7 @@ func main(){
 	log.Println("debug:", debug)
 	log.Println("username:", username)
 	log.Println("difficulty:", difficulty)
-	log.Println("config_path:", config_path)
+	log.Println("config_path:", config_path) //TODO ADD SUPPORT FOR CONFIG FILE
 	log.Println("VERSION:", VERSION)
 
 	//read config
@@ -77,12 +80,28 @@ func main(){
 
 	// work(username, difficulty, software_name, rig_name)
 
-	m := Worker{
+	miner := Worker{
 		Username 		: username,
 		Difficulty 		: difficulty,
 		Software_name 	: software_name,
 		Rig_name 		: rig_name,
+		Xxhash			: xxhash,
+		Job_type 		: "JOB",
 	}
 
-	m.Work()
+	miners := []Worker{}
+	for i := 0; i <= workers; i++{
+		miners = append(miners, miner)
+		miners[i].Software_name = miners[i].Rig_name + " " + strconv.Itoa(i)
+		log.Println("created worker " + strconv.Itoa(i))
+		// setup xxhash
+		if(xxhash){miners[i].Job_type = "JOBXX"; miners[i].Difficulty = "XXHASH"}
+		// if(xxhash){log.Fatalln("xxHash is disabled")}
+		if(i==workers){
+			miners[i].Work()
+		} else {
+			go miners[i].Work()
+		}
+		log.Println("started worker " + strconv.Itoa(i))
+	}
 }

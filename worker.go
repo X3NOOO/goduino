@@ -13,7 +13,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
-
+	"github.com/cespare/xxhash"
 	// "net/http"
 	"strconv"
 	// "strconv"
@@ -53,10 +53,13 @@ type Worker struct {
 	Difficulty 		string
 	Software_name 	string
 	Rig_name 		string
+	Xxhash			bool
+	Job_type		string
 }
 
 func (self Worker) Work() {
-	var username, difficulty, software_name, rig_name string = self.Username, self.Difficulty, self.Software_name, self.Rig_name
+	var username, difficulty, software_name, rig_name, job_type string = self.Username, self.Difficulty, self.Software_name, self.Rig_name, self.Job_type
+	var xxhash_enable bool = self.Xxhash
 	// Get server details from GETPOOL_ADDR
 	log.Println("getting fastest server")
 	pool_address, err := getFastestServer()
@@ -75,7 +78,7 @@ func (self Worker) Work() {
 	ALL_PORTS = append(ALL_PORTS, AVAILABLE_PORTS[:]...) 
 	log.Println("ALL_PORTS:", ALL_PORTS)
 	var conn net.Conn
-	for i := 0; i <= len(ALL_PORTS); i++{
+	for i := 0; i <= len(ALL_PORTS); i++ {
 		conn, err = net.Dial("tcp", server_details.Ip + ":" + ALL_PORTS[i])
 		//TODO uncomment line above for release and comment line below
 		// conn, err = net.Dial("tcp", "51.15.127.80:2813")
@@ -102,8 +105,8 @@ func (self Worker) Work() {
 	for {
 		// get a job
 		log.Println("getting job")
-		log.Println("job request:", "JOB," + username + "," + difficulty)
-		_, err = conn.Write([]byte("JOB," + username + "," + difficulty))
+		log.Println("job request:", job_type + "," + username + "," + difficulty)
+		_, err = conn.Write([]byte(job_type + "," + username + "," + difficulty))
 		if(err != nil){
 			log.Println("error while getting a job:", err)
 			continue
@@ -111,6 +114,9 @@ func (self Worker) Work() {
 		job_buff := make([]byte, 1024)
 		_, err = conn.Read(job_buff)
 		if(err != nil){
+			if(xxhash_enable){
+				log.Fatalln("xxHash is currently disabled")
+			}
 			log.Println("error while reading a job:", err)
 			continue
 		}
@@ -123,10 +129,17 @@ func (self Worker) Work() {
 		diff_job, _ := strconv.Atoi(job[2])
 
 		// brute force hash
+		var hash string
 		for i := 0; i <= diff_job*100; i++{
-			h := sha1.New()
-			h.Write([]byte(pref_job + strconv.Itoa(i)))
-			hash := hex.EncodeToString(h.Sum(nil))
+			if(xxhash_enable){
+				h := xxhash.New()
+				h.Write([]byte(pref_job + strconv.Itoa(i)))
+				hash = hex.EncodeToString(h.Sum(nil))
+			} else {
+				h := sha1.New()
+				h.Write([]byte(pref_job + strconv.Itoa(i)))
+				hash = hex.EncodeToString(h.Sum(nil))
+			}
 
 			if(hash == target_job){
 				log.Println("guessed hash " + hash + " on " + strconv.Itoa(i))
@@ -156,6 +169,9 @@ func (self Worker) Work() {
 					log.Fatalln("invalid username")
 				}
 			}
+		}
+		if(rejected >= MAX_REJ){
+			log.Fatalln("reached max rejected hashes, exiting")
 		}
 	}
 }
