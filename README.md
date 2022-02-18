@@ -5,9 +5,11 @@ goduino is miner for DUCO (<https://duinocoin.com/>) that support emulating your
 ## installation
 
 from binary:
+
 1. download binary for your platform from release
 
 from source:
+
 1. `git clone https://github.com/X3NOOO/goduino`
 2. `cd goduino`
 3. `make release`
@@ -48,3 +50,4 @@ Usage of goduino:
 
 [X] add xxhash support
 [ ] add hashrate limiter
+[ ] user-friendly logs

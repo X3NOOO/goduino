@@ -12,6 +12,7 @@ import (
 	"runtime/pprof"
 	"strconv"
 	"syscall"
+	"time"
 	// "time"
 )
 
@@ -45,6 +46,8 @@ func main(){
 	flag_diff := flag.String("diff", "MEDIUM", "difficulty that you want to mine on")
 	flag_config := flag.String("config", "", "enter path to your configuration file")
 	flag_xxhash := flag.Bool("xxhash", false, "do you want to use xxhash instead of sha1")
+	flag_max_hashrate := flag.String("max_hashrate", "", "do you want to limit hashrate to some value (supported options: LOW_NANO, LOW_ESP32, LOW_PI4; or: value in H/s eg. 720 will mean 720H/s)")
+	flag_max_rejected := flag.Int("after how many rejected hashes you want to exit", 0, "default: disabled")
 
 
 	flag.Parse()
@@ -57,6 +60,8 @@ func main(){
 	var difficulty string = *flag_diff
 	var config_path string = *flag_config
 	var xxhash bool = *flag_xxhash
+	var max_hashrate_str string = *flag_max_hashrate
+	var max_rejected int = *flag_max_rejected
 	
 	// Set up logging
 	if(!debug){log.SetOutput(ioutil.Discard)}
@@ -66,11 +71,11 @@ func main(){
 	log.Println("software_name:", software_name)
 	log.Println("debug:", debug)
 	log.Println("username:", username)
-	log.Println("difficulty:", difficulty)
-	log.Println("config_path:", config_path) //TODO ADD SUPPORT FOR CONFIG FILE
+	log.Println("config_path:", config_path) 
+	log.Println("max_hashrate_str:", max_hashrate_str)
 	log.Println("VERSION:", VERSION)
 
-	//read config
+	//read config //TODO ADD SUPPORT FOR CONFIG FILE
 	if(config_path != ""){
 		log.Println("reading config file")
 	}
@@ -78,7 +83,36 @@ func main(){
 	// validate username
 	if(username == ""){log.Fatalln("invalid username")}
 
-	// work(username, difficulty, software_name, rig_name)
+	// set up max hashrate
+	var max_hashrate int
+	var err error
+	if(max_hashrate_str != ""){
+		switch max_hashrate_str{
+			case "LOW_NANO":
+				max_hashrate = LOW_NANO
+				difficulty = "LOW"
+				break
+			
+			case "LOW_ESP32":
+				max_hashrate = LOW_ESP32
+				difficulty = "LOW"
+				break
+			
+			case "LOW_PI4":
+				max_hashrate = LOW_PI4
+				difficulty = "LOW"
+				break
+			default:
+				max_hashrate, err = strconv.Atoi(max_hashrate_str)
+				if(err != nil){
+					log.Fatalln("error while setting max hashrate:", err)
+				}
+		}
+	} else {
+		max_hashrate = 0
+	}
+	log.Println("max_hashrate:", max_hashrate)
+	log.Println("difficulty:", difficulty)
 
 	miner := Worker{
 		Username 		: username,
@@ -87,6 +121,8 @@ func main(){
 		Rig_name 		: rig_name,
 		Xxhash			: xxhash,
 		Job_type 		: "JOB",
+		Max_hashrate	: max_hashrate,
+		Max_rejected	: max_rejected,
 	}
 
 	miners := []Worker{}
@@ -100,6 +136,7 @@ func main(){
 		if(i==workers){
 			miners[i].Work()
 		} else {
+			time.Sleep(2* time.Second)
 			go miners[i].Work()
 		}
 		log.Println("started worker " + strconv.Itoa(i))

@@ -13,7 +13,10 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
+
 	"github.com/cespare/xxhash"
+
 	// "net/http"
 	"strconv"
 	// "strconv"
@@ -55,11 +58,15 @@ type Worker struct {
 	Rig_name 		string
 	Xxhash			bool
 	Job_type		string
+	Max_hashrate	int
+	Max_rejected	int
 }
 
 func (self Worker) Work() {
 	var username, difficulty, software_name, rig_name, job_type string = self.Username, self.Difficulty, self.Software_name, self.Rig_name, self.Job_type
 	var xxhash_enable bool = self.Xxhash
+	var max_hashrate, max_rejected int = self.Max_hashrate, self.Max_rejected
+	_ = max_hashrate
 	// Get server details from GETPOOL_ADDR
 	log.Println("getting fastest server")
 	pool_address, err := getFastestServer()
@@ -130,7 +137,8 @@ func (self Worker) Work() {
 
 		// brute force hash
 		var hash string
-		for i := 0; i <= diff_job*100; i++{
+		timer_time := time.Now()
+		for i := 0; i <= diff_job*100; i++ {
 			if(xxhash_enable){
 				h := xxhash.New()
 				h.Write([]byte(pref_job + strconv.Itoa(i)))
@@ -142,7 +150,27 @@ func (self Worker) Work() {
 			}
 
 			if(hash == target_job){
-				log.Println("guessed hash " + hash + " on " + strconv.Itoa(i))
+				taken_time := time.Since(timer_time)
+				log.Println("guessed hash " + hash + " on " + strconv.Itoa(i) + " in", taken_time)
+
+				// if max hashrate is specified, wait X seconds and then send result to the server
+				if(max_hashrate != 0){
+					var wait time.Duration = (time.Duration(i)/time.Duration(max_hashrate)) - taken_time
+					log.Println("sleeping", wait*time.Second, "to reach excepted hashrate", max_hashrate, "H/s")
+					time.Sleep(wait * time.Second)
+				}
+				hashrate := (float64(i)/(taken_time.Seconds()))
+				var hashrate_suff string
+				if(hashrate > float64(K) && hashrate < float64(K)) {
+					hashrate_suff = "H/s"
+				} else if(hashrate >= float64(K) && hashrate < float64(M)) {
+					hashrate = hashrate/float64(K)
+					hashrate_suff = "KH/s"
+				} else if(hashrate >= float64(M)) {
+					hashrate = hashrate/float64(M)
+					hashrate_suff = "MH/s"
+				}
+				log.Println("hashrate:", hashrate, hashrate_suff)
 				log.Println("sending to server: " + strconv.Itoa(i) + "," + strconv.Itoa(diff_job) + "," + software_name + "," + rig_name)
 				_, err = conn.Write([]byte(strconv.Itoa(i) + "," + strconv.Itoa(diff_job) + "," + software_name + "," + rig_name))
 				if(err != nil){
@@ -169,9 +197,9 @@ func (self Worker) Work() {
 					log.Fatalln("invalid username")
 				}
 			}
-		}
-		if(rejected >= MAX_REJ){
-			log.Fatalln("reached max rejected hashes, exiting")
+			if(max_rejected != 0 && rejected >= max_rejected){
+				log.Fatalln("reached max rejected value, exiting")
+			}
 		}
 	}
 }
