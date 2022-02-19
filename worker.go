@@ -116,6 +116,10 @@ func (self Worker) Work() {
 		_, err = conn.Write([]byte(job_type + "," + username + "," + difficulty))
 		if(err != nil){
 			log.Println("error while getting a job:", err)
+			server_errors++
+			if(server_errors >= max_server_errors){
+				log.Fatalln("reached max_server_errors, exiting")
+			}
 			continue
 		}
 		job_buff := make([]byte, 1024)
@@ -150,16 +154,34 @@ func (self Worker) Work() {
 			}
 
 			if(hash == target_job){
-				taken_time := time.Since(timer_time)
-				log.Println("guessed hash " + hash + " on " + strconv.Itoa(i) + " in", taken_time)
+				// taken_time := time.Since(timer_time)
+				log.Println("guessed hash " + hash + " on " + strconv.Itoa(i) + " in", time.Since(timer_time))
 
-				// if max hashrate is specified, wait X seconds and then send result to the server
+				// // if max hashrate is specified, wait X seconds and then send result to the server
+				// if(max_hashrate != 0){
+					// var wait time.Duration = time.Duration(i/max_hashrate) - taken_time
+					// log.Println("sleeping", wait*time.Second, "to reach excepted hashrate", max_hashrate, "H/s")
+					// time.Sleep(wait * time.Second)
+				// }
+
+				// wait util hashrate >= max_hashrate - 10
+				var hashrate float64
 				if(max_hashrate != 0){
-					var wait time.Duration = (time.Duration(i)/time.Duration(max_hashrate)) - taken_time
-					log.Println("sleeping", wait*time.Second, "to reach excepted hashrate", max_hashrate, "H/s")
-					time.Sleep(wait * time.Second)
+					log.Println("trying to reach", max_hashrate, "H/s")
+					log.Println("program might seems frozen now, but it probably is not")
+					for{
+						hashrate = (float64(i)/(time.Since(timer_time).Seconds()))	
+						if(hashrate < float64(max_hashrate)){
+							log.Println("reached specified hashrate")
+							break
+						}else{
+							// log.Print("sleeping")
+							time.Sleep(10*time.Microsecond)
+						}
+					}
 				}
-				hashrate := (float64(i)/(taken_time.Seconds()))
+
+				hashrate = (float64(i)/(time.Since(timer_time).Seconds()))
 				var hashrate_suff string
 				if(hashrate > float64(K) && hashrate < float64(K)) {
 					hashrate_suff = "H/s"
@@ -175,12 +197,20 @@ func (self Worker) Work() {
 				_, err = conn.Write([]byte(strconv.Itoa(i) + "," + strconv.Itoa(diff_job) + "," + software_name + "," + rig_name))
 				if(err != nil){
 					log.Println("error while sending hash result")
+					server_errors++
+					if(server_errors >= max_server_errors){
+						log.Fatalln("reached max_server_errors, exiting")
+					}
 					break
 				}
 				resp_buff := make([]byte, 32)
 				_, err = conn.Read(resp_buff)
 				if(err != nil){
 					log.Println("error while revicing result")
+					server_errors++
+					if(server_errors >= max_server_errors){
+						log.Fatalln("reached max_server_errors, exiting")
+					}
 					break
 				}
 				resp_buff = bytes.Trim(resp_buff, "\x00")

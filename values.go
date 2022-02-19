@@ -5,6 +5,8 @@ const (
 	GETPOOL_ADDR string = "https://server.duinocoin.com/getPool"
 	// SERV_ADDR string = "51.15.127.80:2811"
 
+	max_server_errors int = 20
+
 	// prefixes
 	K int = 1000
 	M int = K*K
@@ -16,6 +18,8 @@ const (
 )
 
 var AVAILABLE_PORTS = [...]string{"2811", "2812", "2813", "2814", "2815"}
+
+var server_errors int = 0
 
 var accepted int = 0
 var rejected int = 0
