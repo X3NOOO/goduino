@@ -218,7 +218,7 @@ func (self Worker) Work() {
 				log.Println("server's respond: " + resp)
 
 				if(resp == "GOOD" || resp == "BLOCK"){
-					log.Println("guessed correct hash on " + strconv.Itoa(i))
+					log.Println("guessed correct")
 					accepted++
 				} else if(resp == "BAD"){
 					log.Println("guessed invalid hash on " + strconv.Itoa(i))
