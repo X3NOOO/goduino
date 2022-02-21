@@ -136,7 +136,7 @@ func main(){
 		if(i==workers){
 			miners[i].Work()
 		} else {
-			time.Sleep(2* time.Second)
+			time.Sleep(2 * time.Second)
 			go miners[i].Work()
 		}
 		log.Println("started worker " + strconv.Itoa(i))

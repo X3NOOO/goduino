@@ -48,6 +48,7 @@ Usage of goduino:
 
 ## todo
 
-[X] add xxhash support
-[ ] add hashrate limiter
-[ ] user-friendly logs
+- [X] add xxhash support
+- [X] add hashrate limiter
+- [ ] user-friendly logs
+- [ ] update readme.md
