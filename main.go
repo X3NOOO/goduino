@@ -36,7 +36,9 @@ func handleSIGINT(){
 }
 
 func main(){
+	l := Logger {}
 	handleSIGINT()
+
 	// Get args from flagS
 	flag_workers := flag.Int("workers", 1, "how many devices you want to use")
 	flag_rig_name := flag.String("rig_name", "goduino " + VERSION + " worker", "custom rig name")
@@ -47,7 +49,7 @@ func main(){
 	flag_config := flag.String("config", "", "enter path to your configuration file")
 	flag_xxhash := flag.Bool("xxhash", false, "do you want to use xxhash instead of sha1")
 	flag_max_hashrate := flag.String("max_hashrate", "", "do you want to limit hashrate to some value (supported options: LOW_NANO, LOW_ESP32, LOW_PI4; or: value in H/s eg. 720 will mean 720H/s)")
-	flag_max_rejected := flag.Int("after how many rejected hashes you want to exit", 0, "default: disabled")
+	flag_max_rejected := flag.Int("max_rejected", 0, "after how many rejected hashes you want to exit (default: disabled)")
 
 
 	flag.Parse()
@@ -66,6 +68,14 @@ func main(){
 	// Set up logging
 	if(!debug){log.SetOutput(ioutil.Discard)}
 	
+	l.error("That's how error looks like")
+	l.warning("That's how warning looks like")
+	l.info("That's how information looks like")
+	l.guessed("That's how information about guessed hash looks like")
+	l.hashrate("That's how hashrate message looks like")
+	l.job([]string{"That's how job message looks like"})
+	l.server("That's how server message looks like")
+
 	log.Println("workers:", workers)
 	log.Println("rig_name:", rig_name)
 	log.Println("software_name:", software_name)
@@ -75,13 +85,24 @@ func main(){
 	log.Println("max_hashrate_str:", max_hashrate_str)
 	log.Println("VERSION:", VERSION)
 
+	l.info("workers: " + strconv.Itoa(workers))
+	l.info("Rig name: " + rig_name)
+	l.info("Software name: " + software_name)
+	l.info("Enabled debug: " + strconv.FormatBool(debug))
+	l.info("Username: " + username)
+	l.info("Config path: " + config_path) 
+	l.info("Version: " + VERSION)
+
 	//read config //TODO ADD SUPPORT FOR CONFIG FILE
 	if(config_path != ""){
 		log.Println("reading config file")
+		l.error("Config file isn't supported yet")
+		log.Fatalln("config file isnt supported yet")
 	}
 
 	// validate username
-	if(username == ""){log.Fatalln("invalid username")}
+	if(username == ""){l.error("Invalid username");log.Fatalln("invalid username")}
+
 
 	// set up max hashrate
 	var max_hashrate int
@@ -106,11 +127,14 @@ func main(){
 				max_hashrate, err = strconv.Atoi(max_hashrate_str)
 				if(err != nil){
 					log.Fatalln("error while setting max hashrate:", err)
+					l.error("While setting max hashrate: ", err)
 				}
 		}
 	} else {
 		max_hashrate = 0
 	}
+	l.info("Max hashrate: " + strconv.Itoa(max_hashrate))
+	l.info("Difficulty: " + difficulty)
 	log.Println("max_hashrate:", max_hashrate)
 	log.Println("difficulty:", difficulty)
 
@@ -130,15 +154,19 @@ func main(){
 		miners = append(miners, miner)
 		miners[i].Software_name = miners[i].Rig_name + " " + strconv.Itoa(i)
 		log.Println("created worker " + strconv.Itoa(i))
+		l.info("Created worker " + strconv.Itoa(i))
 		// setup xxhash
 		if(xxhash){miners[i].Job_type = "JOBXX"; miners[i].Difficulty = "XXHASH"}
 		// if(xxhash){log.Fatalln("xxHash is disabled")}
 		if(i==workers){
+			log.Println("Starting worker " + strconv.Itoa(i))
+			l.info("Starting worker " + strconv.Itoa(i))
 			miners[i].Work()
 		} else {
 			time.Sleep(2 * time.Second)
+			log.Println("Starting worker " + strconv.Itoa(i))
+			l.info("Starting worker " + strconv.Itoa(i))
 			go miners[i].Work()
 		}
-		log.Println("started worker " + strconv.Itoa(i))
 	}
 }

@@ -19,23 +19,25 @@ from source:
 ```raw
 Usage of goduino:
   -config string
-        enter path to your configuration file
+    	enter path to your configuration file
   -debug
-        enable debug logs
+    	enable debug logs
   -diff string
-        difficulty that you want to mine on (default "MEDIUM")
+    	difficulty that you want to mine on (default "MEDIUM")
+  -max_hashrate string
+    	do you want to limit hashrate to some value (supported options: LOW_NANO, LOW_ESP32, LOW_PI4; or: value in H/s eg. 720 will mean 720H/s)
+  -max_rejected int
+    	after how many rejected hashes you want to exit (default: disabled)
   -name string
-        your username
+    	your username
   -rig_name string
-        custom rig name (default "goduino 0.1 worker")
+    	custom rig name (default "goduino 0.1 worker")
   -software_name string
-        custom mining software name (default "goduino 0.1")
+    	custom mining software name (default "goduino 0.1")
   -workers int
-        how many devices you want to use (default 1)
+    	how many devices you want to use (default 1)
   -xxhash
-        do you want to use xxhash instead of sha1
-  -h
-        display this help message
+    	do you want to use xxhash instead of sha1
 ```
 
 ## donation
@@ -50,5 +52,6 @@ Usage of goduino:
 
 - [X] add xxhash support
 - [X] add hashrate limiter
-- [ ] user-friendly logs
-- [ ] update readme.md
+- [X] user-friendly logs
+- [X] update readme.md
+- [ ] support for config file

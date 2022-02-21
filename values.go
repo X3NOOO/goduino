@@ -1,7 +1,7 @@
 package main
 
 const (
-	VERSION string = "0.1"
+	VERSION string = "1.0"
 	GETPOOL_ADDR string = "https://server.duinocoin.com/getPool"
 	// SERV_ADDR string = "51.15.127.80:2811"
 
