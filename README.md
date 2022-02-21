@@ -6,7 +6,7 @@ goduino is miner for DUCO (<https://duinocoin.com/>) that support emulating your
 
 from binary:
 
-1. download binary for your platform from release
+1. download binary for your platform from release page
 
 from source:
 
