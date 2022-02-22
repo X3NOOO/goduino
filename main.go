@@ -5,6 +5,7 @@ package main
 import (
 	// "fmt"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -75,6 +76,7 @@ func main(){
 	l.hashrate("That's how hashrate message looks like")
 	l.job([]string{"That's how job message looks like"})
 	l.server("That's how server message looks like")
+	fmt.Println()
 
 	log.Println("workers:", workers)
 	log.Println("rig_name:", rig_name)
@@ -135,6 +137,7 @@ func main(){
 	}
 	l.info("Max hashrate: " + strconv.Itoa(max_hashrate))
 	l.info("Difficulty: " + difficulty)
+	fmt.Println()
 	log.Println("max_hashrate:", max_hashrate)
 	log.Println("difficulty:", difficulty)
 
