@@ -2,6 +2,10 @@
 
 goduino is miner for DUCO (<https://duinocoin.com/>) that support emulating other devices to optimize hashrate
 
+# WARNING
+
+remember of duino [TOS](https://duinocoin.com/legal)
+
 ## installation
 
 from binary:
