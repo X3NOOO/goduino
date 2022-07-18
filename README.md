@@ -46,11 +46,12 @@ Usage of goduino:
 
 ## donation
 
-- XMR: `49F3GknYgs7cRfMJghrd9dHZKe63Z6Y3aJKPecDKqLRje5YebzWvz3VWsTa8e8Sk92G7WJEsyp8L1VEeNxmdj2vZNJSACo1`
+- XMR: `
+8BrqGJBJ9cAKWLhaZws37AbCZtKVg2cfq8JpNr6GmeuZYZUUHLgn2L4PLxg1eZHvzMLNncyYpduVWHb8X49qx8vmAL5oanL`
 - DOGE: `DFYc29EsSuSbyLndGrKBGoC2usHRUqiiXb`
-- BTC: `bc1q08p6wd86806uf2cj95j4pcgl584jvaqkhs37pp`
-- ETH: `0x84FfD8524a66505344A1cbfC3212392Db5b2474d`
-- LTC: `Lew3VmzbkaxzoYG3jNHf263oEDMrQ3ecN1`
+- BTC: `bc1q522kupdywc9zne68whttwcutwq2lfuzat825m4`
+- ETH: `0xd3A2F08A920E581aeDD9edF0990fACf612A85A22`
+- LTC: `ltc1qwva2zxvp77gehpazmmlus7377pypmraqtj8n8f`
 
 ## todo
 
